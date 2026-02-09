@@ -1,14 +1,42 @@
-version: '3.8'
-
 services:
   backend:
     image: demande-back
     container_name: demande-back
     ports:
-      - "8081:8081"
+      - "8082:8081"
+    networks:
+      - monitoring
 
   frontend:
     image: demande-front
     container_name: demande-front
     ports:
       - "4200:80"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
